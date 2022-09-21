@@ -37,6 +37,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+//KhaltiSetting.SecretKey = builder.Configuration.GetSection("Khalti:SecretKey").Get<string>();
+//KhaltiSetting.PublicKey = builder.Configuration.GetSection("Khalti:PublicKey").Get<string>();
 
 app.UseAuthentication();
 app.UseAuthorization();
