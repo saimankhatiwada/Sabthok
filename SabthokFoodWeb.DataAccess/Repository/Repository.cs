@@ -25,10 +25,14 @@ namespace SabthokFoodWeb.DataAccess.Repository
             dbset.Add(entity);
         }
 
-        public IEnumerable<T> GetAll(string? includeproperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeproperties = null)
         {
             IQueryable<T> query = dbset;
-            if(includeproperties != null)
+            if(filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (includeproperties != null)
             {
                 foreach(var includeprop in includeproperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
@@ -38,7 +42,7 @@ namespace SabthokFoodWeb.DataAccess.Repository
             return query.ToList();
         }
 
-        public T GetFirstOrDefault(Expression<Func<T,bool>> filter , string? includeproperties = null)
+        public T GetFirstOrDefault(Expression<Func<T,bool>> filter, string? includeproperties = null)
         {
             IQueryable<T> query = dbset;
             query = query.Where(filter);

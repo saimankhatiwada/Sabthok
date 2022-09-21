@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SabthokFoodWeb.DataAccess.Repository.IRepository;
 using SabthokFoodWeb.Models;
 using SabthokFoodWeb.Models.ViewModel;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace SabthokFoodWeb.Areas.Customer.Controllers
 {
@@ -24,15 +26,40 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
             return View(productlist);
         }
 
-        public IActionResult Details(int? id)
+        public IActionResult Details(int ProductId)
         {
             ShoppingCart shopingcart = new()
             {
                 Count = 1,
-                product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeproperties: "Category,CoverType")
+                ProductId = ProductId,
+                Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == ProductId, includeproperties: "Category,CoverType")
             };
 
             return View(shopingcart);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart shoppingCart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claims = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            shoppingCart.ApplicationUserId = claims.Value;
+
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                u=>u.ApplicationUserId == claims.Value && u.ProductId == shoppingCart.ProductId);
+
+            if(cartFromDb == null)
+            {
+                _unitOfWork.ShoppingCart.Add(shoppingCart);
+            }
+            else
+            {
+                _unitOfWork.ShoppingCart.IncrementCount(cartFromDb,shoppingCart.Count);
+            }
+            _unitOfWork.Save();
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

@@ -23,28 +23,35 @@
                         <li class="nav-item">
                             <a class="nav-link " asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                      @*  <li class="nav-item">
-                            
+                        @*  <li class="nav-item">
+
                         </li>
 
                         <li class="nav-item">
-                           
+
                         </li>*@
-                       <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Content Management</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item " asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
                                 <a class="dropdown-item " asp-area="Admin" asp-controller="ItemType" asp-action="Index">Item</a>
                                 <a class="dropdown-item " asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item " asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
                             </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                                <i class="bi bi-cart"></i>
+                            </a>
                         </li>
                     </ul>
 
                     <partial name="_LoginPartial" />
 
-                   @*<form class="d-flex">
-                        <input class="form-control me-sm-2" type="text" placeholder="Search">
-                        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                    @*<form class="d-flex">
+                    <input class="form-control me-sm-2" type="text" placeholder="Search">
+                    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
                     </form>*@
                 </div>
             </div>
@@ -56,11 +63,11 @@
     <div class="container">
         <main role="main" class="pb-3">
             <partial name="_Notification" />
-            @RenderBody() 
+            @RenderBody()
         </main>
     </div>
 
-   <footer class="footer text-muted bg-primary">
+    <footer class="footer text-muted bg-primary">
         <div class="container">
             &copy; 2022 - SabthokFood
         </div>
@@ -72,6 +79,7 @@
     <script src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="https://cdn.tiny.cloud/1/fjer4askouh9c8o3nfsqlich70sl3w9q7tdbwn6iiwsd20hc/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

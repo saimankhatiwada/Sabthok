@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SabthokFoodModel.Utillity\SabthokFoodModel.Utillity.csproj" />
     <ProjectReference Include="..\SabthokFoodWeb.DataAccess\SabthokFoodWeb.DataAccess.csproj" />
   </ItemGroup>
 

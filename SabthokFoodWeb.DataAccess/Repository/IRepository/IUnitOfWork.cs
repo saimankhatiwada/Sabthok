@@ -13,6 +13,16 @@ namespace SabthokFoodWeb.DataAccess.Repository.IRepository
 
         IProductTypeRepository Product { get; }
 
+        ICompanyRepository Company { get; }
+
+        IShoppingCartRepository ShoppingCart { get; }
+
+        IApplicationUsersRepository ApplicationUsers { get; }
+
+        IOrderHeaderRepository OrderHeader { get; }
+
+        IOrderDetailsRepository OrderDetails { get; }
+
         void Save();
     }
 }

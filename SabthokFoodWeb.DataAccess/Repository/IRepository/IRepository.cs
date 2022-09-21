@@ -11,7 +11,7 @@ namespace SabthokFoodWeb.DataAccess.Repository.IRepository
     {
         T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeproperties = null);
 
-        IEnumerable<T> GetAll(string? includeproperties = null);
+        IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeproperties = null);
 
         void Add(T entity);
 
