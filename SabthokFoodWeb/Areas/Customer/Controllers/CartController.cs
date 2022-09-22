@@ -111,6 +111,8 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
             _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
             _unitOfWork.Save();
 
+            
+
             return RedirectToAction("Index", "Home");
         }
 
