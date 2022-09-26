@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace SabthokFoodModel.Utillity
 {
-    public class KhaltiSetting
+    public class StripeSetting
     {
         public static string SecretKey { get; set; }
 
-        public static string PublicKey { get; set; }
+        public static string PublishableKey { get; set; }
     }
 }

@@ -5,12 +5,14 @@ using SabthokFoodModel.Utillity;
 using SabthokFoodWeb.DataAccess;
 using SabthokFoodWeb.DataAccess.Repository;
 using SabthokFoodWeb.DataAccess.Repository.IRepository;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
@@ -37,8 +39,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-//KhaltiSetting.SecretKey = builder.Configuration.GetSection("Khalti:SecretKey").Get<string>();
-//KhaltiSetting.PublicKey = builder.Configuration.GetSection("Khalti:PublicKey").Get<string>();
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
 app.UseAuthentication();
 app.UseAuthorization();

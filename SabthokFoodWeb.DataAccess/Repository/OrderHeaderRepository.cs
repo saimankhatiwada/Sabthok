@@ -32,5 +32,12 @@ namespace SabthokFoodWeb.DataAccess.Repository
                 }
             }
         }
+
+        public void UpdateStripePaymentId(int id, string sessionid, string? paymentintentId)
+        {
+            var orderFromDb = _context.OrderHeaders.FirstOrDefault(u => u.Id == id);
+            orderFromDb.SessionId = sessionid;
+            orderFromDb.PaymentIntentId = paymentintentId;
+        }
     }
 }
