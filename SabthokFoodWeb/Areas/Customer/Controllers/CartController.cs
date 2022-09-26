@@ -83,8 +83,7 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
             var claims = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claims.Value, includeproperties: "Product");
-            ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
-            ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+            
             ShoppingCartVM.OrderHeader.OrderDate = System.DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = claims.Value;
 
@@ -92,6 +91,18 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
             {
                 cart.Price = GetPriceBasdOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
                 ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+            }
+
+            ApplicationUsers applicationUsers = _unitOfWork.ApplicationUsers.GetFirstOrDefault(u => u.Id == claims.Value);
+            if(applicationUsers.CompanyId.GetValueOrDefault() == 0)
+            {
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+            }
+            else
+            {
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
             }
 
             _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
@@ -110,65 +121,79 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
                 _unitOfWork.Save();
             }
 
-            var domain = "https://localhost:44381/";
-
-            var options = new SessionCreateOptions
+            if(applicationUsers.CompanyId.GetValueOrDefault() == 0)
             {
+                var domain = "https://localhost:44381/";
 
-                PaymentMethodTypes = new List<string>
+                var options = new SessionCreateOptions
+                {
+
+                    PaymentMethodTypes = new List<string>
                 {
                     "card",
                 },
 
-                LineItems = new List<SessionLineItemOptions>(),
-                Mode = "payment",
-                SuccessUrl = domain+$"Customer/Cart/OrderConformation?id={ShoppingCartVM.OrderHeader.Id}",
-                CancelUrl = domain + $"Customer/Cart/Index",
-            };
-
-            foreach(var item in ShoppingCartVM.ListCart)
-            {
-
-                var newsessionLineItem = new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        UnitAmount = (long)((item.Price / 127) * 100),
-                        Currency = "usd",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = item.Product.Title,
-                        },
-
-                    },
-                    Quantity = item.Count,
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+                    SuccessUrl = domain + $"Customer/Cart/OrderConformation?id={ShoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain + $"Customer/Cart/Index",
                 };
-                options.LineItems.Add(newsessionLineItem);
-                
+
+                foreach (var item in ShoppingCartVM.ListCart)
+                {
+
+                    var newsessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)((item.Price / 127) * 100),
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Title,
+                            },
+
+                        },
+                        Quantity = item.Count,
+                    };
+                    options.LineItems.Add(newsessionLineItem);
+
+                }
+
+                var service = new SessionService();
+                Session session = service.Create(options);
+                _unitOfWork.OrderHeader.UpdateStripePaymentId(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
+                _unitOfWork.Save();
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303);
             }
 
-            var service = new SessionService();
-            Session session = service.Create(options);
-            _unitOfWork.OrderHeader.UpdateStripePaymentId(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
-            _unitOfWork.Save();
-            Response.Headers.Add("Location", session.Url);
-            return new StatusCodeResult(303);
+            else
+            {
+                return RedirectToAction("OrderConformation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
+            }
 
         }
 
         public IActionResult OrderConformation(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
-            var service = new SessionService();
-            Session session = service.Get(orderHeader.SessionId);
-            if(session.PaymentStatus.ToLower() == "paid")
+            if(orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
-                _unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
-                _unitOfWork.Save();
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+                if (session.PaymentStatus.ToLower() == "paid")
+                {
+                    _unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.Save();
+                }
+                
             }
+
             List<ShoppingCart> shoppingCart = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCart);
             _unitOfWork.Save();
+
             return View(id);
         }
 
