@@ -42,9 +42,17 @@ namespace SabthokFoodWeb.DataAccess.Repository
             return query.ToList();
         }
 
-        public T GetFirstOrDefault(Expression<Func<T,bool>> filter, string? includeproperties = null)
+        public T GetFirstOrDefault(Expression<Func<T,bool>> filter, string? includeproperties = null, bool tracked = true)
         {
-            IQueryable<T> query = dbset;
+            IQueryable<T> query;
+            if(tracked)
+            {
+                query = dbset;
+            }
+            else
+            {
+                query = dbset.AsNoTracking();
+            }
             query = query.Where(filter);
             if (includeproperties != null)
             {
