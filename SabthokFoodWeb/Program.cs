@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using SabthokFoodModel.Utillity;
 using SabthokFoodWeb.DataAccess;
+using SabthokFoodWeb.DataAccess.DbInitializer;
 using SabthokFoodWeb.DataAccess.Repository;
 using SabthokFoodWeb.DataAccess.Repository.IRepository;
 using Stripe;
@@ -15,15 +16,27 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+builder.Services.AddAuthentication().AddFacebook(options =>
+{
+    options.AppId = "643310773857423";
+    options.AppSecret = "7d31d33416234c779efaec4f4b3a0939";
+});
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
     options.LogoutPath = $"/Identity/Account/Logout";
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
-
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(opions =>
+{
+    opions.IdleTimeout = TimeSpan.FromMinutes(20);
+    opions.Cookie.HttpOnly = true;
+    opions.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
@@ -40,9 +53,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
-
+SeedDatabase();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 app.MapRazorPages();
 
 app.MapControllerRoute(
@@ -50,3 +64,12 @@ app.MapControllerRoute(
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+void SeedDatabase()
+{
+    using(var scope = app.Services.CreateScope())
+    {
+        var dbInitalizer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitalizer.Initialize();
+    }
+}

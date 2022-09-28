@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Hosting;
+using SabthokFoodModel.Utillity;
 using SabthokFoodWeb.DataAccess;
 using SabthokFoodWeb.DataAccess.Repository;
 using SabthokFoodWeb.DataAccess.Repository.IRepository;
@@ -11,6 +13,7 @@ using SabthokFoodWeb.Models.ViewModel;
 namespace SabthokFoodWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

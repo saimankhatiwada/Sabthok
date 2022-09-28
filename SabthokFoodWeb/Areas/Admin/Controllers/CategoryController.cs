@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SabthokFoodModel.Utillity;
 using SabthokFoodWeb.DataAccess;
 using SabthokFoodWeb.DataAccess.Repository.IRepository;
 using SabthokFoodWeb.Models;
@@ -7,6 +9,7 @@ using SabthokFoodWeb.Models;
 namespace SabthokFoodWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles =SD.Role_Admin)]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
