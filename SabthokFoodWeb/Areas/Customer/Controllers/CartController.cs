@@ -126,7 +126,7 @@ namespace SabthokFoodWeb.Areas.Customer.Controllers
 
             if(applicationUsers.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:44381/";
+                var domain = "https://sabthokfood.azurewebsites.net/";
 
                 var options = new SessionCreateOptions
                 {

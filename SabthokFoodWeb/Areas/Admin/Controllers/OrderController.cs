@@ -140,7 +140,7 @@ namespace SabthokFoodWeb.Areas.Admin.Controllers
             OrderVM.orderDetails = _unitOfWork.OrderDetails.GetAll(u => u.OrderId == OrderVM.orderHeader.Id, includeproperties: "Products");
 
             //stripe settings 
-            var domain = "https://localhost:44381/";
+            var domain = "https://sabthokfood.azurewebsites.net/";
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string>
